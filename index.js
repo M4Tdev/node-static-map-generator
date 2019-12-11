@@ -9,6 +9,12 @@ const s3 = new AWS.S3({
 	signatureVersion: 'v4',
 });
 
+app.get('/', (req, res) => {
+	res.json({
+		message: 'Hi',
+	});
+})
+
 // UploadNewMap function
 const uploadNewMap = (mapImage, callback) => {
 	const uploadParams = { Bucket: process.env.BUCKET, Key: '', Body: '' };
