@@ -1,6 +1,6 @@
 const express = require('express');
 require('dotenv').config()
-const StaticMaps = require('staticMaps');
+const StaticMaps = require('staticmaps');
 const AWS = require('aws-sdk');
 
 const app = express();
