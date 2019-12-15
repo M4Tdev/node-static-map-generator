@@ -50,7 +50,7 @@ const getDimensions = (size) => {
 app.get('/generate', (req, res) => {
 	const { query } = req;
 
-	const mapImage = `map-${query.id}-${query.lat}-${query.lng}-${query.size | 'medium'}.png`;
+	const mapImage = `map-${query.lat}-${query.lng}-${query.size | 'medium'}.png`;
 
 	const checkIfExistsParams = {
 		Bucket: process.env.BUCKET,
