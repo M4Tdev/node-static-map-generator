@@ -34,10 +34,10 @@ const getDimensions = (size) => {
 				width: 800,
 				height: 600,
 			};
-		case 'medium':
+		case 'large':
 			return {
-				width: 800,
-				height: 600,
+				width: 1000,
+				height: 800,
 			};
 		default:
 			return {
@@ -50,76 +50,65 @@ const getDimensions = (size) => {
 app.get('/generate', (req, res) => {
 	const { query } = req;
 
-	const mapImage = `map-${query.lat}-${query.lng}-${query.size | 'medium'}.png`;
+	const { lat, lng, size = 'medium', zoom = 13 } = query;
 
-	const checkIfExistsParams = {
-		Bucket: process.env.BUCKET,
-		Key: mapImage,
+	const mapImage = `map-${lat}-${lng}-${size}.png`;
+
+	const mapDimensions = getDimensions(query.size);
+
+	const mapOptions = {
+		width: mapDimensions.width,
+		height: mapDimensions.height,
+		tileUrl: 'https://mt.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
 	};
 
-	s3.headObject(checkIfExistsParams, function (err, metadata) {
-		if (err && err.code === 'NotFound') {
+	const mapMarker = {
+		img: `${__dirname}/assets/pin.png`,
+		offsetX: 18,
+		offsetY: 54,
+		width: 36,
+		height: 54,
+		coord: [parseFloat(query.lng),parseFloat(query.lat)],
+		};
 
-			const mapDimensions = getDimensions(query.size);
+	const map = new StaticMaps(mapOptions);
+	const center = [parseFloat(query.lng),parseFloat(query.lat)];
 
-			const mapOptions = {
-				width: mapDimensions.width,
-				height: mapDimensions.height,
-				// tileUrl: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-				tileUrl: 'https://mt.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-			};
+	map.addMarker(mapMarker);
 
-			const mapMarker = {
-				img: `${__dirname}/assets/pin.png`,
-				offsetX: 18,
-				offsetY: 54,
-				width: 36,
-				height: 54,
-				coord: [parseFloat(query.lng),parseFloat(query.lat)],
-			 };
+	map.render(center, zoom)
+	.then(() => map.image.save(`./generated/${mapImage}`))
+	.then(async () => {
+		const uploadParams = { Bucket: process.env.BUCKET, Key: '', Body: '' };
 
-			const map = new StaticMaps(mapOptions);
-			const center = [parseFloat(query.lng),parseFloat(query.lat)];
+		const fileStream = fs.createReadStream(`./generated/${mapImage}`);
+		fileStream.on('error', function(err) {
+			console.log('File Error', err);
+		});
 
-			map.addMarker(mapMarker);
+		uploadParams.Body = fileStream;
+		uploadParams.Key = path.basename(mapImage);
 
-			map.render(center, query.zoom = 13)
-			.then(() => map.image.save(`./generated/${mapImage}`))
-			.then(async () => {
-				const uploadParams = { Bucket: process.env.BUCKET, Key: '', Body: '' };
-
-				const fileStream = fs.createReadStream(mapImage);
-				fileStream.on('error', function(err) {
-					console.log('File Error', err);
+		s3.upload(uploadParams, function (err, data) {
+			if (err) {
+				res.json({
+					status: 'error',
+					err: err,
 				});
+			}
 
-				uploadParams.Body = fileStream;
-				uploadParams.Key = path.basename(mapImage);
-
-				s3.upload(uploadParams, function (err, data) {
-					if (err) {
-						console.log(err);
-					}
-
-					if (data) {
-						res.json({
-							url: data.Location,
-						});
-					}
+			if (data) {
+				res.json({
+					status: 'success',
+					url: data.Location,
 				});
-			})
-			.catch((err) => res.json({
-				status: 'Something went wrong',
-				err,
-			}));
-		} else {
-			const url = sendUrl(mapImage);
-
-			res.json({
-				url,
-			});
-		}
-	});
+			}
+		});
+	})
+	.catch((err) => res.json({
+		status: 'Something went wrong',
+		err,
+	}));
 });
 
 const PORT = process.env.PORT || 3000;
