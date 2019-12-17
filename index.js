@@ -2,9 +2,6 @@ const express = require('express');
 require('dotenv').config();
 const StaticMaps = require('staticmaps');
 const AWS = require('aws-sdk');
-const sharp = require('sharp');
-const fs = require('fs');
-const path = require('path');
 
 const app = express();
 const s3 = new AWS.S3({
@@ -13,14 +10,6 @@ const s3 = new AWS.S3({
 	accessKeyId: process.env.ACCESS_KEY_ID,
 	secretAccessKey: process.env.SECRET_ACCESS_KEY,
 });
-
-
-// SendUrl function
-const sendUrl = (mapImage) => {
-	const url = `https://${process.env.BUCKET}.s3.eu-central-1.amazonaws.com/${mapImage}`;
-
-	return url;
-};
 
 const getDimensions = (size) => {
 	switch (size) {
@@ -77,17 +66,14 @@ app.get('/generate', (req, res) => {
 	map.addMarker(mapMarker);
 
 	map.render(center, zoom)
-	.then(() => map.image.save(`./generated/${mapImage}`))
 	.then(async () => {
-		const uploadParams = { Bucket: process.env.BUCKET, Key: '', Body: '' };
 
-		const fileStream = fs.createReadStream(`./generated/${mapImage}`);
-		fileStream.on('error', function(err) {
-			console.log('File Error', err);
-		});
+		const imageBuffer = await map.image.buffer('image/png');
 
-		uploadParams.Body = fileStream;
-		uploadParams.Key = path.basename(mapImage);
+		const uploadParams = { Bucket: process.env.BUCKET, Key: '', Body: '', ContentType: 'image/png', };
+
+		uploadParams.Body = imageBuffer;
+		uploadParams.Key = mapImage;
 
 		s3.upload(uploadParams, function (err, data) {
 			if (err) {
