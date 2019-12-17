@@ -9,6 +9,25 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
+"@types/node@*":
+  version "12.12.18"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.18.tgz#8d16634797d63c2af5bc647ce879f8de20b56469"
+  integrity sha512-DBkZuIMFuAfjJHiunyRc+aNvmXYNwV1IPMgGKGlwCp6zh6MKrVtmvjSWK/axWcD25KJffkXgkfvFra8ndenXAw==
+
+"@types/sharp@*":
+  version "0.23.1"
+  resolved "https://registry.yarnpkg.com/@types/sharp/-/sharp-0.23.1.tgz#1e02560371d6603adc121389512f0745028aa507"
+  integrity sha512-iBRM9RjRF9pkIkukk6imlxfaKMRuiRND8L0yYKl5PJu5uLvxuNzp5f0x8aoTG5VX85M8O//BwbttzFVZL1j/FQ==
+  dependencies:
+    "@types/node" "*"
+
+"@types/staticmaps@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@types/staticmaps/-/staticmaps-1.1.0.tgz#c62a086f054c1775cd87db0fa6d54e76f2239c7e"
+  integrity sha512-q/a4VCvrP3SG1XGPWWEcsR9yJnLw/cUz9VGjVLYm2VYqYkKLrryN1JMA/UEIE+kr4T6zKlsHPBfwq8SqRey8Sw==
+  dependencies:
+    "@types/sharp" "*"
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"

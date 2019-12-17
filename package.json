@@ -8,10 +8,14 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "@types/staticmaps": "^1.1.0",
     "aws-sdk": "^2.587.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "nodemon": "^2.0.1",
     "staticmaps": "^1.2.4"
+  },
+  "engines": {
+    "node": "12.x"
   }
 }
